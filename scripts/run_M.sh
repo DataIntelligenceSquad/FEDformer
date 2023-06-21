@@ -9,7 +9,7 @@ do
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ \
-  --data_path Final_nasdaq_gold_btc.csv \
+  --data_path New_Final_nasdaq_gold_btc.csv \
   --task_id Final \
   --model $model \
   --data custom \
@@ -20,9 +20,9 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --enc_in 135 \
-  --dec_in 135 \
-  --c_out 135 \
+  --enc_in 25 \
+  --dec_in 25 \
+  --c_out 25 \
   --des 'Exp' \
   --d_model 512 \
   --itr 3 \
