@@ -16,17 +16,16 @@ mkdir dataset
 cd dataset
 ```
 ```
-gdown 1alE33S1GmP5wACMXaLu50rDIoVzBM4ik
-```
-```
-unzip all_six_datasets.zip
+gdown 1OW5TI5YV2yqWWhpoaBkE1IgcM9OLSTnP
 ```
 
 ## train
 ```
-bash scripts/run_S.sh
+bash scripts/run_M.sh
 ```
 
+## Result
+Check in test_result and result.txt
 
 # FEDformer (ICML 2022 paper)
 
