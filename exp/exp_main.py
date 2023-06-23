@@ -206,7 +206,7 @@ class Exp_Main(Exp_Basic):
         # print(len(test_loader))
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(test_loader):
-                print(i)
+                # print(i)
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float().to(self.device)
 
@@ -248,12 +248,12 @@ class Exp_Main(Exp_Basic):
                     visual(gt, pd, os.path.join(folder_path, str(i) + '.png'))
 
         preds = np.array(preds)
-        print(preds.shape)
+        # print(preds.shape)
         trues = np.array(trues)
-        print('test shape:', preds.shape, trues.shape)
+        # print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        print('test shape:', preds.shape, trues.shape)
+        # print('test shape:', preds.shape, trues.shape)
 
         # result save
         folder_path = './results/' + setting + '/'
@@ -340,7 +340,7 @@ class Exp_Main(Exp_Basic):
         # print(len(test_loader))
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(test_loader):
-                print(i)
+                # print(i)
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float().to(self.device)
 
@@ -382,12 +382,12 @@ class Exp_Main(Exp_Basic):
                     visual(gt, pd, os.path.join(folder_path, str(i) + '.png'))
 
         preds = np.array(preds)
-        print(preds.shape)
+        # print(preds.shape)
         trues = np.array(trues)
-        print('test shape:', preds.shape, trues.shape)
+        # print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        print('test shape:', preds.shape, trues.shape)
+        # print('test shape:', preds.shape, trues.shape)
 
         # result save
         folder_path = './results/' + setting + '/'
