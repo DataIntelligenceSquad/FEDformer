@@ -1,4 +1,4 @@
-from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_Pred
+from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_Pred, Dataset_Specify_Test
 from torch.utils.data import DataLoader
 
 data_dict = {
@@ -25,11 +25,18 @@ def data_provider(args, flag):
         batch_size = 1
         freq = args.detail_freq
         Data = Dataset_Pred
-    else:
+    elif flag == 'train':
         shuffle_flag = True
         drop_last = True
         batch_size = args.batch_size
         freq = args.freq
+    else:
+        shuffle_flag = False
+        drop_last = True
+        batch_size = 1
+        freq = args.freq
+        Data = Dataset_Specify_Test
+        flag = 'test_specify'
 
     data_set = Data(
         root_path=args.root_path,

@@ -43,6 +43,9 @@ def main():
     parser.add_argument('--freq', type=str, default='h',
                         help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, '
                              'b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
+    parser.add_argument('--detail_freq', type=str, default='h',
+                        help='freq for predict, options:[s:secondly, t:minutely, h:hourly, d:daily, '
+                             'b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
 
     # forecasting task
@@ -160,10 +163,16 @@ def main():
                                                                                                       args.distil,
                                                                                                       args.des, ii)
 
-        exp = Exp(args)  # set experiments
-        print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-        exp.test_with_specific_data(setting, test=1)
-        torch.cuda.empty_cache()
+        # exp = Exp(args)  # set experiments
+        # print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+        # exp.test(setting, test=1)
+        # torch.cuda.empty_cache()
+        # Khởi tạo đối tượng Exp_Main
+        exp = Exp_Main(args)
+
+        exp.test_with_specific_data(setting, test = 1)
+
+import pandas as pd
 
 
 if __name__ == "__main__":
