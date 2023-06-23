@@ -45,6 +45,10 @@ class EarlyStopping:
             print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
+                self.counter = 0
+                # args.lradj = 'type1'
+                # adjust_learning_rate(model_optim, epoch + 1, args)
+                # args.lradj = 'type3'
         else:
             self.best_score = score
             self.save_checkpoint(val_loss, model, path)
@@ -55,6 +59,9 @@ class EarlyStopping:
             print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
         torch.save(model.state_dict(), path + '/' + 'checkpoint.pth')
         self.val_loss_min = val_loss
+        
+    def set_erly_stop_false(self):
+        self.early_stop = False
 
 
 class dotdict(dict):
