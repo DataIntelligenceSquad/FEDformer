@@ -25,7 +25,7 @@ def data_provider(args, flag):
         batch_size = 1
         freq = args.detail_freq
         Data = Dataset_Pred
-    elif flag == 'train':
+    elif flag == 'train' or flag == 'val':
         shuffle_flag = True
         drop_last = True
         batch_size = args.batch_size
