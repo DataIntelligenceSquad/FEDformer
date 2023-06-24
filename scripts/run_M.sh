@@ -29,9 +29,8 @@ python -u run.py \
   --lradj 'type3' \
   --target LABEL \
   --dropout 0.05 \
-  --train_epochs 20 \
+  --train_epochs 10 \
   --patience 8 \
   --learning_rate 0.0001 \
-  --version 'Wavelets' \
 
 done

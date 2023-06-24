@@ -11,6 +11,7 @@ from models import FEDformer, Autoformer, Informer, Transformer
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
 import matplotlib.pyplot as plt
+from joblib import load
 
 
 warnings.filterwarnings('ignore')
@@ -233,19 +234,37 @@ class Exp_Main(Exp_Basic):
                 f_dim = -1 if self.args.features == 'MS' else 0
 
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                scaler = load('scaler.joblib')
                 outputs = outputs.detach().cpu().numpy()
                 batch_y = batch_y.detach().cpu().numpy()
+                input = batch_x.detach().cpu().numpy()
+                # outputs = scaler.inverse_transform(outputs)
+                # batch_y = scaler.inverse_transform(batch_y)
+                new_outputs = []
+                new_batch_y = []
+                new_input = []
+                for j in range(batch_y.shape[0]):
+                    new_outputs.append(scaler.inverse_transform(outputs[j]))
+                    new_batch_y.append(scaler.inverse_transform(batch_y[j]))
+                    new_input.append(scaler.inverse_transform(input[j]))
+                outputs = np.asarray(new_outputs)
+                batch_y = np.asarray(new_batch_y)
+                input = np.asarray(new_input)
 
                 pred = outputs  # outputs.detach().cpu().numpy()  # .squeeze()
                 true = batch_y  # batch_y.detach().cpu().numpy()  # .squeeze()
 
                 preds.append(pred)
                 trues.append(true)
+                # print("i: ", i)
                 if i % 5 == 0:
-                    input = batch_x.detach().cpu().numpy()
+                    # print("input: ",input[0,:,:])
+                    # print("true: ", true[0,:,:])
                     gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
                     pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
                     visual(gt, pd, os.path.join(folder_path, str(i) + '.png'))
+                    # print("gt: ", gt)
+                    # print("pd: ", pd)
 
         preds = np.array(preds)
         # print(preds.shape)
@@ -253,18 +272,19 @@ class Exp_Main(Exp_Basic):
         # print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        # print('test shape:', preds.shape, trues.shape)
+        print('test shape:', preds.shape, trues.shape)
 
         # result save
         folder_path = './results/' + setting + '/'
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
+        # print("sample: ",preds[0, :,-1:], trues[0,:,-1:])
 
-        mae, mse, rmse, mape, mspe = metric(preds, trues)
-        print('mse:{}, mae:{}'.format(mse, mae))
+        mae, mse, rmse, mape, mspe = metric(preds[:, :,-1:], trues[:, :,-1:])
+        print('mse:{}, mae:{}, rmse:{}, mape:{}, mspe:{}'.format(mse, mae, rmse, mape, mspe))
         f = open("result.txt", 'a')
         f.write(setting + "  \n")
-        f.write('mse:{}, mae:{}'.format(mse, mae))
+        f.write('mse:{}, mae:{}, rmse:{}, mape:{}, mspe:{}'.format(mse, mae, rmse, mape, mspe))
         f.write('\n')
         f.write('\n')
         f.close()
@@ -394,11 +414,11 @@ class Exp_Main(Exp_Basic):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        mae, mse, rmse, mape, mspe = metric(preds, trues)
-        print('mse:{}, mae:{}'.format(mse, mae))
+        mae, mse, rmse, mape, mspe = metric(preds[:, :,-1:], trues[:, :,-1:])
+        print('mse:{}, mae:{}, rmse:{}, mape:{}, mspe:{}'.format(mse, mae, rmse, mape, mspe))
         f = open("result.txt", 'a')
         f.write(setting + "  \n")
-        f.write('mse:{}, mae:{}'.format(mse, mae))
+        f.write('mse:{}, mae:{}, rmse:{}, mape:{}, mspe:{}'.format(mse, mae, rmse, mape, mspe))
         f.write('\n')
         f.write('\n')
         f.close()

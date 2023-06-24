@@ -72,7 +72,7 @@ class dotdict(dict):
 
 
 class StandardScaler():
-    def __init__(self, mean, std):
+    def __init__(self, mean = 0, std = 1):
         self.mean = mean
         self.std = std
 
