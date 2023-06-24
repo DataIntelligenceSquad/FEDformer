@@ -74,9 +74,35 @@ class Exp_Main(Exp_Basic):
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 f_dim = -1 if self.args.features == 'MS' else 0
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                scaler = load('scaler.joblib')
+                outputs = outputs.detach().cpu().numpy()
+                batch_y = batch_y.detach().cpu().numpy()
+                # input = batch_x.detach().cpu().numpy()
+                # outputs = scaler.inverse_transform(outputs)
+                # batch_y = scaler.inverse_transform(batch_y)
+                new_outputs = []
+                new_batch_y = []
+                # new_input = []
+                for j in range(batch_y.shape[0]):
+                    new_outputs.append(scaler.inverse_transform(outputs[j]))
+                    new_batch_y.append(scaler.inverse_transform(batch_y[j]))
+                    # new_input.append(scaler.inverse_transform(input[j]))
+                outputs = np.asarray(new_outputs)
+                batch_y = np.asarray(new_batch_y)
+                # input = np.asarray(new_input)
 
-                pred = outputs.detach().cpu()
-                true = batch_y.detach().cpu()
+                # print(outputs.shape)
+                # print(batch_y.shape)
+
+
+                pred = torch.from_numpy(outputs[:,:,-1:])
+                true = torch.from_numpy(batch_y[:,:,-1:])
+
+
+                # pred = outputs.detach().cpu()
+                # true = batch_y.detach().cpu()
+
+                # print(type(pred))
 
                 loss = criterion(pred, true)
 
@@ -141,10 +167,13 @@ class Exp_Main(Exp_Basic):
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-
+                    
                     f_dim = -1 if self.args.features == 'MS' else 0
+                    f_dim = -1
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
-
+                    # print("size: ", outputs.size())
+                    outputs = outputs[:, :, f_dim:].to(self.device)
+                    # print("size 2: ", outputs.size())
                     loss = criterion(outputs, batch_y)
                     train_loss.append(loss.item())
 
