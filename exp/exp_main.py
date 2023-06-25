@@ -367,13 +367,14 @@ class Exp_Main(Exp_Basic):
                 input = np.asarray(new_input)
 
                 pred = outputs  # outputs.detach().cpu().numpy()  # .squeeze()
-                preds.append(pred)
+                preds.append(pred[:,:,-1])
                 pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
                 input = input[0,:,-1:]
                 visual(input, pd, 'predict.png')
         preds = np.array(preds)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         # print("preds: ", preds)
+        # print("pred shape: ", preds.shape)
 
         # result save
         folder_path = './results/' + setting + '/'
