@@ -170,8 +170,9 @@ class Dataset_Pred(Dataset):
 
         if self.scale:
             self.scaler.fit(df_data.values)
+            dump(self.scaler, 'scaler_pred.joblib')
             data = self.scaler.transform(df_data.values)
-            # dump(self.scaler, 'scaler.joblib')
+            # print("self scaler: ", self.scaler)
         else:
             data = df_data.values
 
@@ -279,9 +280,9 @@ class Dataset_Specify_Test(Dataset):
 
         if self.scale:
             train_data = df_data[border1s[0]:border2s[0]]
-            self.scaler.fit(train_data.values)
+            self.scaler.fit(df_data.values)
             data = self.scaler.transform(df_data.values)
-            # dump(self.scaler, 'scaler.joblib')
+            dump(self.scaler, 'scaler_test_specity.joblib')
         else:
             data = df_data.values
 

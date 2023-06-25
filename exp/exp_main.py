@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from joblib import load
 
 
+
 warnings.filterwarnings('ignore')
 
 
@@ -324,19 +325,17 @@ class Exp_Main(Exp_Basic):
 
         return
 
-    def predict(self, setting, load=False):
+    def predict(self, setting, model_path, load=False):
+        from joblib import load
         pred_data, pred_loader = self._get_data(flag='pred')
-
-        if load:
-            path = os.path.join(self.args.checkpoints, setting)
-            best_model_path = path + '/' + 'checkpoint.pth'
-            self.model.load_state_dict(torch.load(best_model_path))
-
+        
+        self.model.load_state_dict(torch.load(model_path))
         preds = []
 
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(pred_loader):
+                scaler_pred = load('scaler_pred.joblib')
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float()
                 batch_x_mark = batch_x_mark.float().to(self.device)
@@ -358,10 +357,23 @@ class Exp_Main(Exp_Basic):
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 pred = outputs.detach().cpu().numpy()  # .squeeze()
-                preds.append(pred)
+                input = batch_x.detach().cpu().numpy()
+                new_outputs = []
+                new_input = []
+                for j in range(pred.shape[0]):
+                    new_outputs.append(scaler_pred.inverse_transform(pred[j]))
+                    new_input.append(scaler_pred.inverse_transform(input[j]))
+                outputs = np.asarray(new_outputs)
+                input = np.asarray(new_input)
 
+                pred = outputs  # outputs.detach().cpu().numpy()  # .squeeze()
+                preds.append(pred)
+                pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
+                input = input[0,:,-1:]
+                visual(input, pd, 'predict.png')
         preds = np.array(preds)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
+        # print("preds: ", preds)
 
         # result save
         folder_path = './results/' + setting + '/'

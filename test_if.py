@@ -170,7 +170,8 @@ def main():
         # Khởi tạo đối tượng Exp_Main
         exp = Exp_Main(args)
 
-        exp.test_with_specific_data(setting, test = 1)
+        # exp.test_with_specific_data(setting, test = 1)
+        exp.predict(load=False, setting = setting, model_path = '/home/students/FEDformer/result_final/new_1/checkpoints/Final_FEDformer_random_modes64_custom_ftM_sl96_ll48_pl24_dm512_nh8_el2_dl1_df2048_fc3_ebtimeF_dtTrue_Exp_0/checkpoint.pth')
 
 import pandas as pd
 
