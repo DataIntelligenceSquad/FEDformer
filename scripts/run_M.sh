@@ -26,11 +26,11 @@ python -u run.py \
   --des 'Exp' \
   --d_model 512 \
   --itr 1 \
-  --lradj 'type3' \
+  --lradj 'type1' \
   --target LABEL \
   --dropout 0.05 \
-  --train_epochs 10 \
-  --patience 8 \
+  --train_epochs 20 \
+  --patience 5 \
   --learning_rate 0.0001 \
 
 done
