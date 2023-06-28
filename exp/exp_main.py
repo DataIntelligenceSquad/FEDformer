@@ -287,7 +287,7 @@ class Exp_Main(Exp_Basic):
                 preds.append(pred)
                 trues.append(true)
                 # print("i: ", i)
-                if i % 5 == 0:
+                if i % 1 == 0:
                     # print("input: ",input[0,:,:])
                     # print("true: ", true[0,:,:])
                     gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
@@ -299,10 +299,10 @@ class Exp_Main(Exp_Basic):
         preds = np.array(preds)
         # print(preds.shape)
         trues = np.array(trues)
-        # print('test shape:', preds.shape, trues.shape)
+        print('test shape 1:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        print('test shape:', preds.shape, trues.shape)
+        print('test shape 2:', preds.shape, trues.shape)
 
         # result save
         folder_path = './results/' + setting + '/'
@@ -446,10 +446,10 @@ class Exp_Main(Exp_Basic):
         preds = np.array(preds)
         # print(preds.shape)
         trues = np.array(trues)
-        # print('test shape:', preds.shape, trues.shape)
+        print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        # print('test shape:', preds.shape, trues.shape)
+        print('test shape 2:', preds.shape, trues.shape)
 
         # result save
         folder_path = './results/' + setting + '/'
