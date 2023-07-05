@@ -50,8 +50,9 @@ class Exp_Main(Exp_Basic):
         movement_loss_func = MovementLoss()
         return criterion, movement_loss_func
 
-    def vali(self, vali_data, vali_loader, criterion):
+    def vali(self, vali_data, vali_loader, criterion, movement_loss_func):
         total_loss = []
+        total_movement_loss = []
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
@@ -107,12 +108,15 @@ class Exp_Main(Exp_Basic):
                 # true = batch_y.detach().cpu()
 
                 # print(type(pred))
+                movement_loss = movement_loss_func(pred, true)
                 loss = criterion(pred, true)
 
+                total_movement_loss.append(movement_loss)
                 total_loss.append(loss)
+        total_movement_loss = np.average(total_movement_loss)
         total_loss = np.average(total_loss)
         self.model.train()
-        return total_loss
+        return total_loss, total_movement_loss
 
     def train(self, setting):
         train_data, train_loader = self._get_data(flag='train')
@@ -208,12 +212,12 @@ class Exp_Main(Exp_Basic):
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
             train_loss_movement = np.average(train_loss_movement)
-            vali_loss = self.vali(vali_data, vali_loader, criterion)
-            test_loss = self.vali(test_data, test_loader, criterion)
+            vali_loss, val_movement_loss = self.vali(vali_data, vali_loader, criterion, movement_loss_func)
+            test_loss, test_movement_loss = self.vali(test_data, test_loader, criterion, movement_loss_func)
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Movement loss: {3:.7f} Vali Loss: {4:.7f} Test Loss: {5:.7f}".format(
-                epoch + 1, train_steps, train_loss, train_loss_movement, vali_loss, test_loss))
-            early_stopping(vali_loss, self.model, path)
+            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Movement loss: {3:.7f} Vali Loss: {4:.7f} Vali Movement Loss: {5:.7f} Test Loss: {6:.7f} Test Movement Loss: {7:.7f}".format(
+                epoch + 1, train_steps, train_loss, train_loss_movement, vali_loss, val_movement_loss, test_loss, test_movement_loss))
+            early_stopping(vali_loss + val_movement_loss, self.model, path)
             if early_stopping.early_stop:
                 print("Early stopping")
                 # early_stopping.early_stop = False
