@@ -56,6 +56,8 @@ class Exp_Main(Exp_Basic):
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
+                if i == 0:
+                    pre_batch_y = 0
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float()
 
@@ -108,11 +110,12 @@ class Exp_Main(Exp_Basic):
                 # true = batch_y.detach().cpu()
 
                 # print(type(pred))
-                movement_loss = movement_loss_func(pred, true)
+                movement_loss = movement_loss_func(pred, true, pre_batch_y)
                 loss = criterion(pred, true)
 
                 total_movement_loss.append(movement_loss)
                 total_loss.append(loss)
+                pre_batch_y = batch_y
         total_movement_loss = np.average(total_movement_loss)
         total_loss = np.average(total_loss)
         self.model.train()
@@ -146,6 +149,8 @@ class Exp_Main(Exp_Basic):
             self.model.train()
             epoch_time = time.time()
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(train_loader):
+                if i == 0:
+                    pre_batch_y = 0
                 iter_count += 1
                 model_optim.zero_grad()
                 batch_x = batch_x.float().to(self.device)
@@ -169,7 +174,7 @@ class Exp_Main(Exp_Basic):
                         f_dim = -1 if self.args.features == 'MS' else 0
                         batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                         loss = criterion(outputs, batch_y)
-                        movement_loss = movement_loss_func(outputs, batch_y)
+                        movement_loss = movement_loss_func(outputs, batch_y, batch_x)
                         train_loss.append(loss.item())
                         train_loss_movement.append(movement_loss.item())
                 else:
@@ -185,11 +190,12 @@ class Exp_Main(Exp_Basic):
                     outputs = outputs[:, :, f_dim:].to(self.device)
                     # print("size outputs: ", outputs.size())
                     # print("size batch_y: ", batch_y.size())
-                    movement_loss = movement_loss_func(outputs, batch_y)
+                    movement_loss = movement_loss_func(outputs, batch_y, pre_batch_y)
                     loss = criterion(outputs, batch_y)
                     
                     train_loss.append(loss.item())
                     train_loss_movement.append(movement_loss.item())
+                    pre_batch_y = batch_y
 
                 if (i + 1) % 100 == 0:
                     # print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
@@ -208,6 +214,7 @@ class Exp_Main(Exp_Basic):
                     movement_loss.backward(retain_graph=True)
                     loss.backward()
                     model_optim.step()
+                
 
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
