@@ -5,14 +5,14 @@ class MovementLoss(nn.Module):
     def __init__(self):
         super(MovementLoss, self).__init__()
 
-    def forward(self, predictions, targets, pre_batch_y):
+    def forward(self, predictions, targets, pre_batch_y, flag = 'train'):
         # print(type(pre_batch_y))
         if not isinstance(pre_batch_y, int):
             first_true_change = targets[:, :1, :] - pre_batch_y[:, -1:, :]
             first_pred_change = predictions[:, :1, :] - pre_batch_y[:, -1:, :]
         else:
-            first_true_change = targets[:, :1, :] - targets[:, -1:, :]
-            first_pred_change = predictions[:, :1, :] - targets[:, -1:, :]
+            first_true_change = targets[:, :1, :] - targets[:, :1, :]
+            first_pred_change = predictions[:, :1, :] - targets[:, :1, :]
         
         # Tính toán sự thay đổi giữa các giá trị thực tế
         true_changes = targets[:, 1:, :] - targets[:, :-1, :]
@@ -20,8 +20,12 @@ class MovementLoss(nn.Module):
         # Tính toán sự thay đổi của các giá trị dự đoán so với giá trị thực tế
         pred_changes = predictions[:, 1:, :] - predictions[:, :-1, :]
 
-        true_changes = torch.cat((first_true_change, true_changes), dim = 1)
-        pred_changes = torch.cat((first_pred_change, pred_changes), dim = 1)
+        if flag == 'val':
+            true_changes = torch.cat((first_true_change, true_changes), dim = 2)
+            pred_changes = torch.cat((first_pred_change, pred_changes), dim = 2)
+        else:
+            true_changes = torch.cat((first_true_change, true_changes), dim = 1)
+            pred_changes = torch.cat((first_pred_change, pred_changes), dim = 1)
         
         # Tạo tensor chứa các giá trị 0 và 1 tương ứng với các trường hợp dấu trái ngược và dấu cùng hướng
         sign_diff = torch.sign(true_changes * pred_changes)

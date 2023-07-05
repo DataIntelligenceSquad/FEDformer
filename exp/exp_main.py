@@ -110,7 +110,7 @@ class Exp_Main(Exp_Basic):
                 # true = batch_y.detach().cpu()
 
                 # print(type(pred))
-                movement_loss = movement_loss_func(pred, true, pre_batch_y)
+                movement_loss = movement_loss_func(pred, true, pre_batch_y, flag = 'val')
                 loss = criterion(pred, true)
 
                 total_movement_loss.append(movement_loss)
