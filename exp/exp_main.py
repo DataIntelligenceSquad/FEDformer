@@ -12,6 +12,7 @@ from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
 import matplotlib.pyplot as plt
 from joblib import load
+from exp.movement_loss import MovementLoss
 
 
 
@@ -44,8 +45,10 @@ class Exp_Main(Exp_Basic):
         return model_optim
 
     def _select_criterion(self):
-        criterion = nn.MSELoss()
-        return criterion
+        # criterion = nn.MSELoss()
+        criterion = nn.L1Loss()
+        movement_loss_func = MovementLoss()
+        return criterion, movement_loss_func
 
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
@@ -104,7 +107,6 @@ class Exp_Main(Exp_Basic):
                 # true = batch_y.detach().cpu()
 
                 # print(type(pred))
-
                 loss = criterion(pred, true)
 
                 total_loss.append(loss)
@@ -127,7 +129,7 @@ class Exp_Main(Exp_Basic):
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
 
         model_optim = self._select_optimizer()
-        criterion = self._select_criterion()
+        criterion, movement_loss_func = self._select_criterion()
 
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
@@ -135,6 +137,7 @@ class Exp_Main(Exp_Basic):
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
+            train_loss_movement = []
 
             self.model.train()
             epoch_time = time.time()
@@ -162,7 +165,9 @@ class Exp_Main(Exp_Basic):
                         f_dim = -1 if self.args.features == 'MS' else 0
                         batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                         loss = criterion(outputs, batch_y)
+                        movement_loss = movement_loss_func(outputs, batch_y)
                         train_loss.append(loss.item())
+                        train_loss_movement.append(movement_loss.item())
                 else:
                     if self.args.output_attention:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
@@ -174,9 +179,13 @@ class Exp_Main(Exp_Basic):
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                     # print("size: ", outputs.size())
                     outputs = outputs[:, :, f_dim:].to(self.device)
-                    # print("size 2: ", outputs.size())
+                    # print("size outputs: ", outputs.size())
+                    # print("size batch_y: ", batch_y.size())
+                    movement_loss = movement_loss_func(outputs, batch_y)
                     loss = criterion(outputs, batch_y)
+                    
                     train_loss.append(loss.item())
+                    train_loss_movement.append(movement_loss.item())
 
                 if (i + 1) % 100 == 0:
                     # print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
@@ -187,20 +196,23 @@ class Exp_Main(Exp_Basic):
                     time_now = time.time()
 
                 if self.args.use_amp:
+                    scaler.scale(movement_loss).backward(retain_graph=True)
                     scaler.scale(loss).backward()
                     scaler.step(model_optim)
                     scaler.update()
                 else:
+                    movement_loss.backward(retain_graph=True)
                     loss.backward()
                     model_optim.step()
 
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
+            train_loss_movement = np.average(train_loss_movement)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
             test_loss = self.vali(test_data, test_loader, criterion)
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
-                epoch + 1, train_steps, train_loss, vali_loss, test_loss))
+            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Movement loss: {3:.7f} Vali Loss: {4:.7f} Test Loss: {5:.7f}".format(
+                epoch + 1, train_steps, train_loss, train_loss_movement, vali_loss, test_loss))
             early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
                 print("Early stopping")
@@ -287,7 +299,7 @@ class Exp_Main(Exp_Basic):
                 preds.append(pred)
                 trues.append(true)
                 # print("i: ", i)
-                if i % 1 == 0:
+                if i % 100 == 0:
                     # print("input: ",input[0,:,:])
                     # print("true: ", true[0,:,:])
                     gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
