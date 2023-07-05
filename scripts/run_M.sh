@@ -9,20 +9,20 @@ do
 python -u run.py \
   --is_training 1 \
   --root_path ./dataset/ \
-  --data_path New_Final_nasdaq_gold_btc.csv \
+  --data_path LABEL_BTC_0_with_BTC_new.csv \
   --task_id Final \
   --model $model \
   --data custom \
   --features M \
-  --seq_len 96 \
-  --label_len 48 \
-  --pred_len 24 \
+  --seq_len 24 \
+  --label_len 12 \
+  --pred_len 2 \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --enc_in 25 \
-  --dec_in 25 \
-  --c_out 25 \
+  --enc_in 11 \
+  --dec_in 11 \
+  --c_out 11 \
   --des 'Exp' \
   --d_model 512 \
   --itr 1 \
