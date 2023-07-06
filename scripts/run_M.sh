@@ -14,8 +14,8 @@ python -u run.py \
   --model $model \
   --data custom \
   --features M \
-  --seq_len 24 \
-  --label_len 12 \
+  --seq_len 12 \
+  --label_len 6 \
   --pred_len 2 \
   --e_layers 2 \
   --d_layers 1 \
@@ -29,7 +29,7 @@ python -u run.py \
   --lradj 'type1' \
   --target LABEL \
   --dropout 0.05 \
-  --train_epochs 20 \
+  --train_epochs 15 \
   --patience 5 \
   --learning_rate 0.0001 \
 
